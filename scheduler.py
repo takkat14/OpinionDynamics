@@ -7,16 +7,22 @@ import numpy as np
 
 
 class SmartInteractionStagedActivation(BaseScheduler):
-    """
-    Every agent should have method "fetch" and "apply"
-    """
-
     def __init__(self,
                  model,
                  stage_list,
                  shuffle: bool = False,
                  shuffle_between_stages: bool = False,
                  regime="p2p"):
+        """
+        Custom scheduler class for Deffuant model
+        !Every agent should have method "fetch" and "apply"!
+
+        :param model: mesa.Model -- model of scheduler
+        :param stage_list: List[str] -- list of stages in execution order
+        :param shuffle: bool -- shuffle agents before step
+        :param shuffle_between_stages: bool -- shuffle agents between stages
+        :param regime: str -- "p2p" or "all" -- agents' interaction regime
+        """
         super().__init__(model)
         # Stage_list -- список функций в агенте,
         # которые нужно вызвать для каждого агента последовательно.
@@ -40,7 +46,7 @@ class SmartInteractionStagedActivation(BaseScheduler):
                     if self.regime == "p2p":
                         # Пока что, тут есть риск убедить самого себя
                         # В какой-то мере, это логично, так что исправлять не буду.
-                        # Выбираем агента, с кем нужно по взаимодействовать
+                        # Выбираем агента, с кем нужно повзаимодействовать
                         other_agent = self.model.random.choice(agent_keys)
                         getattr(self._agents[agent_key], stage)(self._agents[other_agent])  # Запускаем функцию.
                     if self.regime == "all":
