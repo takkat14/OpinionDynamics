@@ -5,6 +5,7 @@ from scheduler import SmartInteractionStagedActivation
 
 class OpinionModel(Model):
     def __init__(self, N, mu, init_u, regime="p2p"):
+        super().__init__()
         self.num_agents = N
         self.mu = mu
         self.regime = regime
@@ -15,12 +16,13 @@ class OpinionModel(Model):
             x = self.random.uniform(-1, 1)
             a = OpinionAgent(i, self, x, init_u, self.mu, model_regime=self.regime)
             self.schedule.add(a)
-            # Add the agent to a random grid cell
 
+        # Have absolutely no idea what to collect here
         # self.datacollector = DataCollector(
         #     model_reporters={"Gini": compute_gini},
         #     agent_reporters={"Wealth": "wealth"}
         # )
+
 
     def step(self):
         # self.datacollector.collect(self)

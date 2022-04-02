@@ -2,6 +2,10 @@ from mesa.time import BaseScheduler
 import numpy as np
 
 
+# Тут мы реализуем свой fancy шедулер,
+# чтобы воспроизвести логику заморозки времени во время взаимодействий агентов
+
+
 class SmartInteractionStagedActivation(BaseScheduler):
     """
     Every agent should have method "fetch" and "apply"
@@ -14,6 +18,8 @@ class SmartInteractionStagedActivation(BaseScheduler):
                  shuffle_between_stages: bool = False,
                  regime="p2p"):
         super().__init__(model)
+        # Stage_list -- список функций в агенте,
+        # которые нужно вызвать для каждого агента последовательно.
         self.stage_list = stage_list
         self.shuffle = shuffle
         self.shuffle_between_stages = shuffle_between_stages
@@ -26,17 +32,24 @@ class SmartInteractionStagedActivation(BaseScheduler):
         if self.shuffle:
             self.model.random.shuffle(agent_keys)
         for stage in self.stage_list:
-            for i, agent_key in enumerate(agent_keys):
+            # Ну, до оптимальных времен
+            # if "fetch" in stage and self.regime == "all":
+            #     xu = [for]
+            for agent_key in agent_keys:
                 if "fetch" in stage:
                     if self.regime == "p2p":
                         # Пока что, тут есть риск убедить самого себя
-                        # В какой-то мере, это логично, так что исправлять не буду
-                        other_agent = self.model.random.choice(agent_keys)  # Sample other agent
-                        getattr(self._agents[agent_key], stage)(self._agents[other_agent])  # Run stage
+                        # В какой-то мере, это логично, так что исправлять не буду.
+                        # Выбираем агента, с кем нужно по взаимодействовать
+                        other_agent = self.model.random.choice(agent_keys)
+                        getattr(self._agents[agent_key], stage)(self._agents[other_agent])  # Запускаем функцию.
+                    if self.regime == "all":
+                        getattr(self._agents[agent_key], stage)()
                 elif "apply" == stage:
-                    getattr(self._agents[agent_key], stage)()
+                    getattr(self._agents[agent_key], stage)()  # Применяем все изменения для нашего малышарика.
+                else:
+                    raise AttributeError("Not only fetch or apply in stage list")
             if self.shuffle_between_stages:
                 self.model.random.shuffle(agent_keys)
             self.time += self.stage_time
-
         self.steps += 1
