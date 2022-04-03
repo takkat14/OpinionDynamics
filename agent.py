@@ -28,22 +28,24 @@ class OpinionAgent(Agent):
 
         overlap = min(self.x + self.u, other_agent.x + other_agent.u) - max(self.x - self.u,
                                                                             other_agent.x - other_agent.u)
-        delta_us = overlap / other_agent.u - 1
-        delta_other = overlap / self.u - 1
-        if delta_us > 0:
+        if overlap > other_agent.u:
+            delta_us = overlap / other_agent.u - 1
             self.delta_x += self.mu * delta_us * (other_agent.x - self.x)
             self.delta_u += self.mu * delta_us * (other_agent.u - self.u)
-        if delta_other > 0:
+        if overlap > self.u:
+            delta_other = overlap / self.u - 1
             other_agent.delta_x += other_agent.mu * delta_other * (self.x - other_agent.x)
             other_agent.delta_u += other_agent.mu * delta_other * (self.u - other_agent.u)
 
     def fetch_all(self):
         # Неоптимально, потому что мозги вышли из чата
         for agent in self.model.schedule._agents:
-            self.fetch_p2p(agent)
+            self.fetch_p2p(self.model.schedule._agents[agent])
 
     def apply(self):
         self.x += self.delta_x
         self.x = max(self.x, -1)
         self.x = min(self.x, 1)
         self.u += self.delta_u
+        self.u = max(self.u, 1e-10)
+        self.u = min(self.u, 2)

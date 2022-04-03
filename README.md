@@ -7,11 +7,12 @@
 * Implemented basic model and agent classes in __**p2p** regime_ - randomly selected interactions with other agents._
 * Implemented custom scheduler for providing correct behaviour.
 * Implemented **UNOPTIMAL** agent in _**all** regime - every agent interact with **all** others._
+* Implemented extremism behaviour, (03.04 -- some crucial fixes)
+* Add basic visualizations of model simulation.
 
 ## Further work
 
 * Add convergence analysis.
-* Add vizualizations of model simulation.
 * Run several experiments to analyze model behaviour.
 * Create metric for clustering similarity (Investigate, please!).
 * Design up ML model to avoid large and long runs of provided model

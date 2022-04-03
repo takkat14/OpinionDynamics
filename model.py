@@ -5,32 +5,29 @@ from scheduler import SmartInteractionStagedActivation
 
 
 class OpinionModel(Model):
-    def __init__(self, N, mu, init_u, d=None, regime="p2p"):
-        """
-
-        :param N: int -- number of agents in model
-        :param mu: float -- constant parameter which amplitude controls the speed of the dynamics
-        :param init_u: float -- uncertainty value for moderators (until sampling is not implemented)
-        :param d: float -- extremists ratio
-        :param regime: str -- "p2p" or "all" -- agents' interaction regime
-        """
+    def __init__(self, N, mu, init_u, extremist_ratio=None, d=None, extremist_u=None, regime="p2p"):
         super().__init__()
-        self.num_agents = N  # TODO: add extremists
-        self.d = d
+        self.num_agents = N
+        self.num_extremist = int(self.num_agents * extremist_ratio)
+        self.d = d  # d * self.num_extremist = p+ - p- => p+ = (d + 1) * self.ext / 2
+        self.p_plus = (self.d + 1) * self.num_extremist / 2
         self.init_u = init_u
+        self.u_e = extremist_u
         # TODO: add a distribution for the parameter 'mu', since it is the coefficient of impact on a certain person
         self.mu = mu
         self.regime = regime
         self.stage_list = ["fetch_" + self.regime, "apply"]
         self.schedule = SmartInteractionStagedActivation(self, self.stage_list, regime=self.regime)
         # Create agents
-        for i in range(self.num_agents):
-            x = self.random.uniform(-1.01, 1.01)
-            u = self.init_u  # TODO: add some regimes of uncertainty sampling
+        opinions = [self.random.uniform(-1, 1) for _ in range(self.num_agents)]  # Красота вышла из чата
+        opinions.sort()
+        for i, x in enumerate(opinions):
+            # TODO: add some regimes of uncertainty sampling
+            u = self.u_e if (self.num_agents - self.p_plus <= i) or (i < self.num_extremist - self.p_plus) else self.init_u
             a = OpinionAgent(i, self, x, u, self.mu, model_regime=self.regime)
             self.schedule.add(a)
         self.datacollector = DataCollector(
-            # TODO: add convergence checker
+            # TODO: add convergence checker over
             # model_reporters={"Convergence": check_convergence},
             agent_reporters={"Opinion": "x", "Uncertainty": "u", "Delta X": "delta_x", "Delta U": "delta_u"})
 
