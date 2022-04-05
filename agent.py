@@ -2,7 +2,7 @@ from mesa import Agent
 
 
 class OpinionAgent(Agent):
-    def __init__(self, unique_id, model, x, u, mu, model_regime="p2p"):
+    def __init__(self, unique_id, model, x, u, mu, model_regime="p2p", is_extremist=False):
         """
         Implementation of agent in Deffuant model
 
@@ -21,6 +21,7 @@ class OpinionAgent(Agent):
         self.delta_u = 0
         # self.steps = 0
         self.regime = model_regime
+        self.is_extremist = is_extremist
 
     def fetch_p2p(self, other_agent):
         self.delta_x = 0
