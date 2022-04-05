@@ -39,8 +39,6 @@ class SmartInteractionStagedActivation(BaseScheduler):
             self.model.random.shuffle(agent_keys)
         for stage in self.stage_list:
             # Ну, до оптимальных времен
-            # if "fetch" in stage and self.regime == "all":
-            #     xu = [for]
             for agent_key in agent_keys:
                 if "fetch" in stage:
                     if self.regime == "p2p":
@@ -48,10 +46,12 @@ class SmartInteractionStagedActivation(BaseScheduler):
                         # В какой-то мере, это логично, так что исправлять не буду.
                         # Выбираем агента, с кем нужно повзаимодействовать
                         other_agent = self.model.random.choice(agent_keys)
+                        if other_agent == agent_key:
+                            other_agent = self.model.random.choice(agent_keys)
                         getattr(self._agents[agent_key], stage)(self._agents[other_agent])  # Запускаем функцию.
                     if self.regime == "all":
                         getattr(self._agents[agent_key], stage)()
-                elif "apply" == stage:
+                elif "apply" in stage:
                     getattr(self._agents[agent_key], stage)()  # Применяем все изменения для нашего малышарика.
                 else:
                     raise AttributeError("Not only fetch or apply in stage list")
