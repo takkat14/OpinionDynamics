@@ -1,8 +1,8 @@
-import numpy as np
 from mesa import Model
 from mesa.datacollection import DataCollector
-from agent import OpinionAgent
-from scheduler import SmartInteractionStagedActivation
+from model.agent import OpinionAgent
+import numpy as np
+from model.scheduler import SmartInteractionStagedActivation
 
 
 class OpinionModel(Model):
@@ -37,7 +37,9 @@ class OpinionModel(Model):
             a = OpinionAgent(i, self, x, u, self.mu, model_regime=self.regime, is_extremist=is_extremist)
             self.schedule.add(a)
         self.datacollector = DataCollector(
-            agent_reporters={"Opinion": "x", "Uncertainty": "u", "Delta X": "historic_delta_x", "Delta U": "historic_delta_u"})
+            model_reporters={"Y": self.check_clusters_convergence},
+            agent_reporters={"Opinion": "x", "Uncertainty": "u", "Delta X": "historic_delta_x",
+                             "Delta U": "historic_delta_u"})
 
     def check_convergence(self) -> bool:
         for agent in self.schedule.agents:
@@ -59,3 +61,23 @@ class OpinionModel(Model):
     def step(self):
         self.datacollector.collect(self)
         self.schedule.step()
+
+    def check_clusters_convergence(self):
+        became_positive = 0
+        became_negative = 0
+        for agent in self.schedule.agents:
+            if not agent.is_extremist:
+                if -1 <= round(agent.x, 1) <= -0.9:
+                    became_negative += 1
+                elif 0.9 <= round(agent.x, 1) <= 1:
+                    became_positive += 1
+        num_moderate = self.num_agents - self.num_extremist
+        y = (became_positive / num_moderate) ** 2 + (became_negative / num_moderate) ** 2
+        return y
+
+    def get_clusters(self):
+        clusters = np.round(np.array(self.datacollector._agent_records[self.schedule.steps - 1])[:, 2], 1)
+        clusters_count = {cluster: 0 for cluster in set(clusters)}
+        for opinion in clusters:
+            clusters_count[opinion] += 1
+        return clusters_count

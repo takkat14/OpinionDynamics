@@ -1,5 +1,4 @@
 from mesa.time import BaseScheduler
-import numpy as np
 
 
 # Тут мы реализуем свой fancy шедулер,
