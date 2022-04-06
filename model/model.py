@@ -61,6 +61,8 @@ class OpinionModel(Model):
     def step(self):
         self.datacollector.collect(self)
         self.schedule.step()
+        if self.check_convergence():
+            self.running = False
 
     def check_clusters_convergence(self):
         became_positive = 0
@@ -75,8 +77,8 @@ class OpinionModel(Model):
         y = (became_positive / num_moderate) ** 2 + (became_negative / num_moderate) ** 2
         return y
 
-    def get_clusters(self):
-        clusters = np.round(np.array(self.datacollector._agent_records[self.schedule.steps - 1])[:, 2], 1)
+    def get_clusters(self, step):
+        clusters = np.round(np.array(self.datacollector._agent_records[step])[:, 2], 1)
         clusters_count = {cluster: 0 for cluster in set(clusters)}
         for opinion in clusters:
             clusters_count[opinion] += 1
